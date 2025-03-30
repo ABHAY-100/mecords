@@ -7,6 +7,7 @@ import {
   View,
   StyleSheet,
   Font,
+  Image,
 } from "@react-pdf/renderer";
 
 Font.register({
@@ -35,14 +36,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     whiteSpace: "pre-wrap",
   },
+  imageContainer: {
+    marginTop: 15,
+    marginBottom: 15,
+    alignItems: "center",
+  },
+  image: {
+    width: "210px",
+    marginHorizontal: "auto",
+  },
 });
 
 interface PDFDocumentProps {
   program: string;
   output: string;
+  image?: string;
 }
 
-export const PDFDocument = ({ program, output }: PDFDocumentProps) => (
+export const PDFDocument = ({ program, output, image }: PDFDocumentProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.sectionTitle}>
@@ -55,6 +66,13 @@ export const PDFDocument = ({ program, output }: PDFDocumentProps) => (
       <View style={styles.sectionTitle}>
         <Text>Output</Text>
       </View>
+      {image && (
+        <>
+          <View style={styles.imageContainer}>
+            <Image src={image} style={styles.image} />
+          </View>
+        </>
+      )}
       <View style={styles.code}>
         <Text>{output || "% paste output here"}</Text>
       </View>

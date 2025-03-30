@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontFamily: "Latin Modern Roman",
     marginBottom: "1.5cm",
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   sectionHeader: {
     fontSize: 14,
@@ -94,18 +94,15 @@ export const ExperimentPDFDocument = ({
 }: ExperimentPDFDocumentProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      {/* Header */}
       <View style={styles.header}>
         <Text>Experiment No.: {experimentNumber || "_____"}</Text>
         <Text>Date: {experimentDate || "_________"}</Text>
       </View>
 
-      {/* Title */}
       <View style={styles.title}>
         <Text>{experimentTitle || "EXPERIMENT TITLE"}</Text>
       </View>
 
-      {/* Aim */}
       <View style={styles.sectionHeader}>
         <Text>Aim:</Text>
       </View>
@@ -113,7 +110,6 @@ export const ExperimentPDFDocument = ({
         <Text>{experimentAim || "To be specified..."}</Text>
       </View>
 
-      {/* Algorithm */}
       <View style={styles.sectionHeader}>
         <Text>Algorithm:</Text>
       </View>
@@ -135,7 +131,6 @@ export const ExperimentPDFDocument = ({
         ))}
       </View>
 
-      {/* Result */}
       <View style={styles.sectionHeader}>
         <Text>Result:</Text>
       </View>

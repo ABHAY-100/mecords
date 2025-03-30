@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { Label } from "@/components/ui/label";
 
 const PDFDownloadButton = dynamic(
@@ -51,6 +52,10 @@ export default function Home() {
 
   const [program, setProgram] = useState("");
   const [output, setOutput] = useState("");
+  const [outputImage, setOutputImage] = useState<string | undefined | null>(
+    undefined
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [experimentNumber, setExperimentNumber] = useState("");
   const [experimentDate, setExperimentDate] = useState("");
@@ -80,7 +85,6 @@ export default function Home() {
   const removeAlgorithmStep = (index: number) => {
     if (algorithmSteps.length <= 2) return;
 
-    // Create a completely new array excluding the item at the specified index
     const newSteps = algorithmSteps
       .filter((_, i) => i !== index)
       .map((step) => ({
@@ -138,6 +142,38 @@ export default function Home() {
     } catch (error) {
       console.error("PDF Generation Error:", error);
       return <Button variant="destructive">Failed to generate PDF</Button>;
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        console.error("File is not an image:", file.type);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const result = reader.result as string;
+          console.log("Image loaded successfully, size:", result.length);
+          setOutputImage(result);
+        } catch (error) {
+          console.error("Error loading image:", error);
+        }
+      };
+      reader.onerror = (error) => {
+        console.error("FileReader error:", error);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setOutputImage(undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -207,6 +243,48 @@ export default function Home() {
                   value={output}
                   onChange={(e) => setOutput(e.target.value)}
                 />
+              </div>
+
+              <div>
+                <Label
+                  htmlFor="output-image"
+                  className="block text-sm font-medium mb-2"
+                >
+                  <p className="text-[14px] pl-[5px]">
+                    Output Image (optional) :
+                  </p>
+                </Label>
+                <div className="flex flex-col gap-2">
+                  <Input
+                    ref={fileInputRef}
+                    id="output-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="mb-2"
+                  />
+
+                  {outputImage && (
+                    <div className="relative border rounded p-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 bg-white/80 rounded-full"
+                        onClick={removeImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                      <Image
+                        src={outputImage}
+                        alt="Output Preview"
+                        className="max-h-[200px] object-contain mx-auto"
+                        width={400}
+                        height={200}
+                        style={{ objectFit: "contain", maxHeight: "200px" }}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
@@ -380,6 +458,19 @@ export default function Home() {
                   {program || "% paste program here"}
                 </pre>
 
+                {outputImage && (
+                  <div className="mt-5">
+                    <Image
+                      src={outputImage}
+                      alt="Output Preview"
+                      className="mx-auto border border-gray-200"
+                      width={400}
+                      height={200}
+                      style={{ objectFit: "contain", maxHeight: "200px" }}
+                    />
+                  </div>
+                )}
+
                 <div className="section-title font-clashgrotesk font-medium mt-5">
                   Output :{" "}
                 </div>
@@ -440,7 +531,12 @@ export default function Home() {
 
       <div className="mt-4">
         {templateType === "simple" ? (
-          <PDFDownloadButton program={program} output={output} />
+          <PDFDownloadButton
+            key={`pdf-${outputImage ? "with-image" : "no-image"}-${Date.now()}`}
+            program={program}
+            output={output}
+            image={outputImage || undefined}
+          />
         ) : (
           handleExperimentPDFDownload()
         )}

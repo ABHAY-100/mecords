@@ -15,21 +15,40 @@ interface AlgorithmStep {
 interface SimplePDFProps {
   program: string;
   output: string;
+  image?: string;
 }
 
-export function PDFDownloadButton({ program, output }: SimplePDFProps) {
+export function PDFDownloadButton({ program, output, image }: SimplePDFProps) {
+  const safeImage =
+    typeof image === "string" && image.startsWith("data:image/")
+      ? image
+      : undefined;
+
   return (
     <PDFDownloadLink
-      document={<PDFDocument program={program} output={output} />}
+      document={
+        <PDFDocument program={program} output={output} image={safeImage} />
+      }
       fileName="leftside.pdf"
       className="inline-block"
     >
-      {({ loading }) => (
-        <Button disabled={loading} className="flex items-center gap-2">
-          <Download size={16} />
-          {loading ? "Generating PDF..." : "Download PDF"}
-        </Button>
-      )}
+      {({ loading, error }) => {
+        if (error) {
+          console.error("PDF generation error:", error);
+          return (
+            <Button variant="destructive" className="flex items-center gap-2">
+              <Download size={16} />
+              Error generating PDF
+            </Button>
+          );
+        }
+        return (
+          <Button disabled={loading} className="flex items-center gap-2">
+            <Download size={16} />
+            {loading ? "Generating PDF..." : "Download PDF"}
+          </Button>
+        );
+      }}
     </PDFDownloadLink>
   );
 }
@@ -45,22 +64,22 @@ interface ExperimentPDFProps {
   };
 }
 
-export function ExperimentPDFDownloadButton({experimentData}: ExperimentPDFProps) {
-  // Create a deep copy of the data to avoid reference issues
+export function ExperimentPDFDownloadButton({
+  experimentData,
+}: ExperimentPDFProps) {
   const safeData = {
-    experimentNumber: experimentData.experimentNumber || '',
-    experimentDate: experimentData.experimentDate || '',
-    experimentTitle: experimentData.experimentTitle || '',
-    experimentAim: experimentData.experimentAim || '',
-    // Create a completely new array with only the needed properties
-    algorithmSteps: (experimentData.algorithmSteps || []).map(step => ({
-      text: String(step.text || ''),
+    experimentNumber: experimentData.experimentNumber || "",
+    experimentDate: experimentData.experimentDate || "",
+    experimentTitle: experimentData.experimentTitle || "",
+    experimentAim: experimentData.experimentAim || "",
+    algorithmSteps: (experimentData.algorithmSteps || []).map((step) => ({
+      text: String(step.text || ""),
       hasCode: Boolean(step.hasCode),
-      code: String(step.code || '')
+      code: String(step.code || ""),
     })),
-    experimentResult: experimentData.experimentResult || ''
+    experimentResult: experimentData.experimentResult || "",
   };
-  
+
   return (
     <PDFDownloadLink
       document={
@@ -76,9 +95,9 @@ export function ExperimentPDFDownloadButton({experimentData}: ExperimentPDFProps
       fileName="rightside.pdf"
       className="inline-block"
     >
-      {({loading}) => (
+      {({ loading }) => (
         <Button disabled={loading} className="flex items-center gap-2">
-          <Download size={16}/>
+          <Download size={16} />
           {loading ? "Generating PDF..." : "Download PDF"}
         </Button>
       )}

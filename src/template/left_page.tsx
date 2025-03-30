@@ -16,13 +16,13 @@ Font.register({
 
 const styles = StyleSheet.create({
   page: {
-    padding: "1.5cm",
+    padding: "1cm",
     fontFamily: "Latin Modern Roman",
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: "semibold",
-    marginTop: 15,
+    marginTop: 6,
     marginBottom: 5,
     borderBottom: "1pt solid black",
     paddingBottom: 2,

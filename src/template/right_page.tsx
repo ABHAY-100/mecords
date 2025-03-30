@@ -32,15 +32,19 @@ interface ExperimentPDFDocumentProps {
 // Create styles
 const styles = StyleSheet.create({
   page: {
-    padding: "1.5cm",
+    padding: "1cm",
     fontFamily: "Latin Modern Roman",
     fontSize: 12,
-    lineHeight: 1.5,
+    lineHeight: 0.7,
   },
   header: {
-    textAlign: "right",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    alignItems: "center",
+    fontSize: "13px",
     marginBottom: "1.5cm",
-    fontSize: 12,
   },
   title: {
     textAlign: "center",
@@ -57,7 +61,7 @@ const styles = StyleSheet.create({
     marginBottom: "0.5cm",
   },
   content: {
-    marginBottom: "0cm",
+    marginBottom: "-0.2cm",
   },
   codeBlock: {
     backgroundColor: "#f5f5f5",
@@ -70,7 +74,7 @@ const styles = StyleSheet.create({
   },
   listItem: {
     flexDirection: "row",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   listNumber: {
     width: 20,

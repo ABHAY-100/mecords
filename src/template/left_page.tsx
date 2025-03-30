@@ -1,14 +1,19 @@
-"use client"
+"use client";
 
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer"
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Font,
+} from "@react-pdf/renderer";
 
-// Register a font that resembles Latin Modern Roman
 Font.register({
   family: "Latin Modern Roman",
   src: "https://cdn.jsdelivr.net/npm/@fontsource/eb-garamond@4.5.0/files/eb-garamond-latin-400-normal.woff",
-})
+});
 
-// Create styles
 const styles = StyleSheet.create({
   page: {
     padding: "1.5cm",
@@ -30,11 +35,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     whiteSpace: "pre-wrap",
   },
-})
+});
 
 interface PDFDocumentProps {
-  program: string
-  output: string
+  program: string;
+  output: string;
 }
 
 export const PDFDocument = ({ program, output }: PDFDocumentProps) => (
@@ -55,5 +60,4 @@ export const PDFDocument = ({ program, output }: PDFDocumentProps) => (
       </View>
     </Page>
   </Document>
-)
-
+);

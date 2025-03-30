@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { PDFDownloadLink } from "@react-pdf/renderer"
-import { PDFDocument } from "@/app/pdf-document"
+import { PDFDocument } from "@/template/left_page"
 import { Download } from "lucide-react"
 
 interface PDFDownloadButtonProps {

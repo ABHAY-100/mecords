@@ -8,7 +8,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-clashgrotesk: 'Clash Grotesk', sans-serif;
+  --font-clashgrotesk: "Clash Grotesk", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -116,6 +116,10 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    /* overflow-y: scroll; */
   }
   body {
     @apply bg-background text-foreground;

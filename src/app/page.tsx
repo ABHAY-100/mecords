@@ -79,17 +79,17 @@ export default function Home() {
 
   const removeAlgorithmStep = (index: number) => {
     if (algorithmSteps.length <= 2) return;
-    
+
     // Create a completely new array excluding the item at the specified index
     const newSteps = algorithmSteps
       .filter((_, i) => i !== index)
-      .map(step => ({
+      .map((step) => ({
         id: step.id,
         text: step.text,
         hasCode: Boolean(step.hasCode),
-        code: step.code
+        code: step.code,
       }));
-    
+
     setAlgorithmSteps(newSteps);
   };
 
@@ -106,32 +106,32 @@ export default function Home() {
   };
 
   const handleExperimentPDFDownload = () => {
-    if (typeof window === 'undefined') return null; 
-    
+    if (typeof window === "undefined") return null;
+
     try {
       // Use a try/catch inside the validation as well
       let validatedSteps;
       try {
-        validatedSteps = algorithmSteps.map(step => ({
-          text: String(step.text || ''),
+        validatedSteps = algorithmSteps.map((step) => ({
+          text: String(step.text || ""),
           hasCode: Boolean(step.hasCode),
-          code: String(step.code || '')
+          code: String(step.code || ""),
         }));
       } catch (e) {
         console.error("Step validation error:", e);
         validatedSteps = [{ text: "Error in steps", hasCode: false, code: "" }];
       }
-  
+
       return (
         <ExperimentPDFDownloadButton
           key={`pdf-${algorithmSteps.length}-${Date.now()}`}
           experimentData={{
-            experimentNumber: experimentNumber || '',
-            experimentDate: experimentDate || '',
-            experimentTitle: experimentTitle || '',
-            experimentAim: experimentAim || '',
+            experimentNumber: experimentNumber || "",
+            experimentDate: experimentDate || "",
+            experimentTitle: experimentTitle || "",
+            experimentAim: experimentAim || "",
             algorithmSteps: validatedSteps,
-            experimentResult: experimentResult || ''
+            experimentResult: experimentResult || "",
           }}
         />
       );
@@ -142,10 +142,10 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto py-12 max-w-7xl font-clashgrotesk px-[120px]">
+    <div className="container mx-auto py-12 max-w-3xl font-clashgrotesk px-[50px] max-sm:px-[18px]">
       <div className="mb-6 gap-3 flex flex-col">
         <Label htmlFor="template-select">
-          <p className="text-[14px] pl-2">Select Template :</p>
+          <p className="text-[14px] pl-[5px]">Select Template :</p>
         </Label>
         <Select
           value={templateType}
@@ -155,11 +155,11 @@ export default function Home() {
         >
           <SelectTrigger
             id="template-select"
-            className="w-full max-w-xs font-normal font-clashgrotesk"
+            className="w-full font-normal font-clashgrotesk overflow-hidden"
           >
             <SelectValue placeholder="Select template type" />
           </SelectTrigger>
-          <SelectContent className="font-normal font-clashgrotesk">
+          <SelectContent className="font-normal font-clashgrotesk overflow-auto">
             <SelectItem value="experiment">Aim, Algorithm & Result</SelectItem>
             <SelectItem value="simple">Program & Output</SelectItem>
           </SelectContent>
@@ -167,10 +167,12 @@ export default function Home() {
       </div>
 
       <Tabs defaultValue="editor" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="editor">Editor</TabsTrigger>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-        </TabsList>
+        <div className="ml-2">
+          <TabsList className="mb-4">
+            <TabsTrigger value="editor">Editor</TabsTrigger>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="editor">
           {templateType === "simple" ? (
@@ -180,7 +182,7 @@ export default function Home() {
                   htmlFor="program"
                   className="block text-sm font-medium mb-2"
                 >
-                  <p className="text-[14px] pl-2">Program :</p>
+                  <p className="text-[14px] pl-[5px]">Program :</p>
                 </Label>
                 <Textarea
                   id="program"
@@ -196,7 +198,7 @@ export default function Home() {
                   htmlFor="output"
                   className="block text-sm font-medium mb-2"
                 >
-                  <p className="text-[14px] pl-2">Output :</p>
+                  <p className="text-[14px] pl-[5px]">Output :</p>
                 </Label>
                 <Textarea
                   id="output"
@@ -215,7 +217,7 @@ export default function Home() {
                     htmlFor="exp-number"
                     className="block text-sm font-medium mb-2"
                   >
-                    <p className="text-[14px] pl-2">Exp. No. : </p>
+                    <p className="text-[14px] pl-[5px]">Exp. No. : </p>
                   </Label>
                   <Input
                     id="exp-number"
@@ -229,7 +231,7 @@ export default function Home() {
                     htmlFor="exp-date"
                     className="block text-sm font-medium mb-2"
                   >
-                    <p className="text-[14px] pl-2">Date : </p>
+                    <p className="text-[14px] pl-[5px]">Date : </p>
                   </Label>
                   <Input
                     id="exp-date"
@@ -245,11 +247,11 @@ export default function Home() {
                   htmlFor="exp-title"
                   className="block text-sm font-medium mb-2"
                 >
-                  <p className="text-[14px] pl-2">Title : </p>
+                  <p className="text-[14px] pl-[5px]">Title : </p>
                 </Label>
                 <Input
                   id="exp-title"
-                  placeholder="e.g., POLYNOMIAL ADDITION"
+                  placeholder="e.g., Polynomial Addition"
                   value={experimentTitle}
                   onChange={(e) => setExperimentTitle(e.target.value)}
                 />
@@ -260,7 +262,7 @@ export default function Home() {
                   htmlFor="exp-aim"
                   className="block text-sm font-medium mb-2"
                 >
-                  <p className="text-[14px] pl-2">Aim : </p>
+                  <p className="text-[14px] pl-[5px]">Aim : </p>
                 </Label>
                 <Textarea
                   id="exp-aim"
@@ -273,13 +275,13 @@ export default function Home() {
 
               <div>
                 <Label className="block text-sm font-medium mb-2">
-                  <p className="text-[14px] pl-2">Algorithm : </p>
+                  <p className="text-[14px] pl-[5px]">Algorithm : </p>
                 </Label>
                 <div className="border rounded-md p-4 space-y-4">
                   {algorithmSteps.map((step, index) => (
                     <div
                       key={index}
-                      className="space-y-2 pb-4 border-b last:border-b-0"
+                      className="space-y-3 pb-4 border-b last:border-b-0"
                     >
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{index + 1}.</span>
@@ -353,11 +355,11 @@ export default function Home() {
                   htmlFor="exp-result"
                   className="block text-sm font-medium mb-2"
                 >
-                  <p className="text-[14px] pl-2">Result : </p>
+                  <p className="text-[14px] pl-[5px]">Result : </p>
                 </Label>
                 <Textarea
                   id="exp-result"
-                  placeholder="Describe the result of the experiment..."
+                  placeholder="e.g., Program has been executed successfully and obtained the output."
                   className="min-h-[100px]"
                   value={experimentResult}
                   onChange={(e) => setExperimentResult(e.target.value)}
@@ -436,7 +438,7 @@ export default function Home() {
         </TabsContent>
       </Tabs>
 
-      <div className="mt-6">
+      <div className="mt-4">
         {templateType === "simple" ? (
           <PDFDownloadButton program={program} output={output} />
         ) : (

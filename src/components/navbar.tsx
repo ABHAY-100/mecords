@@ -6,13 +6,13 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-zinc-300/20 backdrop-blur-md">
       <div className="container flex h-16 items-center px-5 pt-1">
         <div className="mr-4 flex">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 font-clashgrotesk">
             <span className="font-medium text-[28px] font-clashgrotesk">
               {"< Mecords />"}
             </span>
           </Link>
         </div>
-        <div className="flex flex-1 items-center justify-end mr-1">
+        <div className="flex flex-1 items-center justify-end">
           <div className="flex items-center space-x-2">
             <a
               href="https://github.com/ABHAY-100"

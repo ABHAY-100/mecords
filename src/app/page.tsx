@@ -27,7 +27,7 @@ const PDFDownloadButton = dynamic(
 
 const ExperimentPDFDownloadButton = dynamic(
   () =>
-    import("@/components/experiment-button").then(
+    import("@/components/custom-button").then(
       (mod) => mod.ExperimentPDFDownloadButton
     ),
   { ssr: false }
@@ -41,7 +41,7 @@ interface AlgorithmStep {
 
 export default function Home() {
   const [templateType, setTemplateType] = useState<"simple" | "experiment">(
-    "simple"
+    "experiment"
   );
 
   const [program, setProgram] = useState("");
@@ -56,7 +56,7 @@ export default function Home() {
     { text: "Stop", hasCode: false, code: "" },
   ]);
   const [experimentResult, setExperimentResult] = useState(
-    "Program has been executed successfully and obtained the output"
+    "Program has been executed successfully and obtained the output."
   );
 
   const addAlgorithmStep = (index: number) => {
@@ -83,21 +83,21 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="mb-6 gap-2 flex flex-col">
-        <Label htmlFor="template-select">Select Template</Label>
+    <div className="container mx-auto py-12 max-w-7xl font-clashgrotesk px-[120px]">
+      <div className="mb-6 gap-3 flex flex-col">
+        <Label htmlFor="template-select"><p className="text-[14px] pl-2">Select Template :</p></Label>
         <Select
           value={templateType}
           onValueChange={(value: "simple" | "experiment") =>
             setTemplateType(value)
           }
         >
-          <SelectTrigger id="template-select" className="w-full max-w-xs">
+          <SelectTrigger id="template-select" className="w-full max-w-xs font-normal font-clashgrotesk">
             <SelectValue placeholder="Select template type" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="simple">Simple Program & Output</SelectItem>
-            <SelectItem value="experiment">Experiment Report</SelectItem>
+          <SelectContent className="font-normal font-clashgrotesk">
+            <SelectItem value="experiment">Aim, Algorithm & Result</SelectItem>
+            <SelectItem value="simple">Program & Output</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -116,7 +116,7 @@ export default function Home() {
                   htmlFor="program"
                   className="block text-sm font-medium mb-2"
                 >
-                  Program
+                  <p className="text-[14px] pl-2">Program :</p>
                 </Label>
                 <Textarea
                   id="program"
@@ -132,7 +132,7 @@ export default function Home() {
                   htmlFor="output"
                   className="block text-sm font-medium mb-2"
                 >
-                  Output
+                  <p className="text-[14px] pl-2">Output :</p>
                 </Label>
                 <Textarea
                   id="output"
@@ -151,7 +151,7 @@ export default function Home() {
                     htmlFor="exp-number"
                     className="block text-sm font-medium mb-2"
                   >
-                    Experiment Number
+                    <p className="text-[14px] pl-2">Exp. No. : </p>
                   </Label>
                   <Input
                     id="exp-number"
@@ -165,7 +165,7 @@ export default function Home() {
                     htmlFor="exp-date"
                     className="block text-sm font-medium mb-2"
                   >
-                    Date
+                    <p className="text-[14px] pl-2">Exp. Date : </p>
                   </Label>
                   <Input
                     id="exp-date"
@@ -181,7 +181,7 @@ export default function Home() {
                   htmlFor="exp-title"
                   className="block text-sm font-medium mb-2"
                 >
-                  Experiment Title
+                  <p className="text-[14px] pl-2">Title : </p>
                 </Label>
                 <Input
                   id="exp-title"
@@ -196,7 +196,7 @@ export default function Home() {
                   htmlFor="exp-aim"
                   className="block text-sm font-medium mb-2"
                 >
-                  Aim
+                  <p className="text-[14px] pl-2">Aim : </p>
                 </Label>
                 <Textarea
                   id="exp-aim"
@@ -209,7 +209,7 @@ export default function Home() {
 
               <div>
                 <Label className="block text-sm font-medium mb-2">
-                  Algorithm
+                  <p className="text-[14px] pl-2">Algorithm : </p>
                 </Label>
                 <div className="border rounded-md p-4 space-y-4">
                   {algorithmSteps.map((step, index) => (
@@ -289,7 +289,7 @@ export default function Home() {
                   htmlFor="exp-result"
                   className="block text-sm font-medium mb-2"
                 >
-                  Result
+                  <p className="text-[14px] pl-2">Result : </p>
                 </Label>
                 <Textarea
                   id="exp-result"
@@ -304,7 +304,7 @@ export default function Home() {
         </TabsContent>
 
         <TabsContent value="preview">
-          <Card className="p-6 mb-6 w-full  mx-auto bg-white shadow-md">
+          <Card className="p-6 mb-6 mx-auto bg-white shadow-md">
             {templateType === "simple" ? (
               <div className="a4-preview simple-template">
                 <div className="section-title">Program</div>
@@ -348,7 +348,7 @@ export default function Home() {
                 <div className="section-header">Result:</div>
                 <div className="content">
                   {experimentResult ||
-                    "Program has been executed successfully and obtained the output"}
+                    "Program has been executed successfully and obtained the output."}
                 </div>
               </div>
             )}
@@ -356,7 +356,7 @@ export default function Home() {
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-center mt-6">
+      <div className="flex mt-6">
         {templateType === "simple" ? (
           <PDFDownloadButton program={program} output={output} />
         ) : (

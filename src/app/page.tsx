@@ -22,6 +22,7 @@ const PDFDownloadButton = dynamic(
     import("@/components/custom-button").then((mod) => mod.PDFDownloadButton),
   {
     ssr: false,
+    loading: () => <Button disabled>Loading PDF...</Button>,
   }
 );
 
@@ -30,10 +31,14 @@ const ExperimentPDFDownloadButton = dynamic(
     import("@/components/custom-button").then(
       (mod) => mod.ExperimentPDFDownloadButton
     ),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => <Button disabled>Loading PDF...</Button>,
+  }
 );
 
 interface AlgorithmStep {
+  id: string;
   text: string;
   hasCode: boolean;
   code: string;
@@ -51,24 +56,40 @@ export default function Home() {
   const [experimentDate, setExperimentDate] = useState("");
   const [experimentTitle, setExperimentTitle] = useState("");
   const [experimentAim, setExperimentAim] = useState("");
-  const [algorithmSteps, setAlgorithmSteps] = useState<AlgorithmStep[]>([
-    { text: "Start", hasCode: false, code: "" },
-    { text: "Stop", hasCode: false, code: "" },
+  const [algorithmSteps, setAlgorithmSteps] = useState<AlgorithmStep[]>(() => [
+    { id: crypto.randomUUID(), text: "Start", hasCode: false, code: "" },
+    { id: crypto.randomUUID(), text: "Stop", hasCode: false, code: "" },
   ]);
   const [experimentResult, setExperimentResult] = useState(
     "Program has been executed successfully and obtained the output."
   );
 
   const addAlgorithmStep = (index: number) => {
-    const newSteps = [...algorithmSteps];
-    newSteps.splice(index + 1, 0, { text: "", hasCode: false, code: "" });
-    setAlgorithmSteps(newSteps);
+    setAlgorithmSteps((prev) => {
+      const newSteps = [...prev];
+      newSteps.splice(index + 1, 0, {
+        id: crypto.randomUUID(),
+        text: "",
+        hasCode: false,
+        code: "",
+      });
+      return newSteps;
+    });
   };
 
   const removeAlgorithmStep = (index: number) => {
     if (algorithmSteps.length <= 2) return;
-    const newSteps = [...algorithmSteps];
-    newSteps.splice(index, 1);
+    
+    // Create a completely new array excluding the item at the specified index
+    const newSteps = algorithmSteps
+      .filter((_, i) => i !== index)
+      .map(step => ({
+        id: step.id,
+        text: step.text,
+        hasCode: Boolean(step.hasCode),
+        code: step.code
+      }));
+    
     setAlgorithmSteps(newSteps);
   };
 
@@ -77,22 +98,65 @@ export default function Home() {
     field: keyof AlgorithmStep,
     value: string | boolean
   ) => {
-    const newSteps = [...algorithmSteps];
-    newSteps[index] = { ...newSteps[index], [field]: value };
-    setAlgorithmSteps(newSteps);
+    setAlgorithmSteps((prev) => {
+      const newSteps = [...prev];
+      newSteps[index] = { ...newSteps[index], [field]: value };
+      return newSteps;
+    });
+  };
+
+  const handleExperimentPDFDownload = () => {
+    if (typeof window === 'undefined') return null; 
+    
+    try {
+      // Use a try/catch inside the validation as well
+      let validatedSteps;
+      try {
+        validatedSteps = algorithmSteps.map(step => ({
+          text: String(step.text || ''),
+          hasCode: Boolean(step.hasCode),
+          code: String(step.code || '')
+        }));
+      } catch (e) {
+        console.error("Step validation error:", e);
+        validatedSteps = [{ text: "Error in steps", hasCode: false, code: "" }];
+      }
+  
+      return (
+        <ExperimentPDFDownloadButton
+          key={`pdf-${algorithmSteps.length}-${Date.now()}`}
+          experimentData={{
+            experimentNumber: experimentNumber || '',
+            experimentDate: experimentDate || '',
+            experimentTitle: experimentTitle || '',
+            experimentAim: experimentAim || '',
+            algorithmSteps: validatedSteps,
+            experimentResult: experimentResult || ''
+          }}
+        />
+      );
+    } catch (error) {
+      console.error("PDF Generation Error:", error);
+      return <Button variant="destructive">Failed to generate PDF</Button>;
+    }
   };
 
   return (
     <div className="container mx-auto py-12 max-w-7xl font-clashgrotesk px-[120px]">
       <div className="mb-6 gap-3 flex flex-col">
-        <Label htmlFor="template-select"><p className="text-[14px] pl-2">Select Template :</p></Label>
+        <Label htmlFor="template-select">
+          <p className="text-[14px] pl-2">Select Template :</p>
+        </Label>
         <Select
           value={templateType}
           onValueChange={(value: "simple" | "experiment") =>
             setTemplateType(value)
           }
         >
-          <SelectTrigger id="template-select" className="w-full max-w-xs font-normal font-clashgrotesk">
+          <SelectTrigger
+            id="template-select"
+            className="w-full max-w-xs font-normal font-clashgrotesk"
+          >
             <SelectValue placeholder="Select template type" />
           </SelectTrigger>
           <SelectContent className="font-normal font-clashgrotesk">
@@ -165,7 +229,7 @@ export default function Home() {
                     htmlFor="exp-date"
                     className="block text-sm font-medium mb-2"
                   >
-                    <p className="text-[14px] pl-2">Exp. Date : </p>
+                    <p className="text-[14px] pl-2">Date : </p>
                   </Label>
                   <Input
                     id="exp-date"
@@ -200,7 +264,7 @@ export default function Home() {
                 </Label>
                 <Textarea
                   id="exp-aim"
-                  placeholder="Describe the aim of the experiment..."
+                  placeholder="e.g., To read two polynomials and store them in an array. Calculate the sum of the two polynomials."
                   className="min-h-[100px]"
                   value={experimentAim}
                   onChange={(e) => setExperimentAim(e.target.value)}
@@ -304,37 +368,51 @@ export default function Home() {
         </TabsContent>
 
         <TabsContent value="preview">
-          <Card className="p-6 mb-6 mx-auto bg-white shadow-md">
+          <Card className="p-6 mb-6 mx-auto bg-zinc-100">
             {templateType === "simple" ? (
               <div className="a4-preview simple-template">
-                <div className="section-title">Program</div>
-                <pre className="code">{program || "% paste program here"}</pre>
+                <div className="section-title font-clashgrotesk font-medium">
+                  Program :
+                </div>
+                <pre className="code mt-1 font-normal text-zinc-700">
+                  {program || "% paste program here"}
+                </pre>
 
-                <div className="section-title">Output</div>
-                <pre className="code">{output || "% paste output here"}</pre>
+                <div className="section-title font-clashgrotesk font-medium mt-5">
+                  Output :{" "}
+                </div>
+                <pre className="code mt-1 font-normal text-zinc-700">
+                  {output || "% paste output here"}
+                </pre>
               </div>
             ) : (
               <div className="a4-preview experiment-template">
-                <div className="header">
-                  <p>Experiment No: {experimentNumber || "_____"}</p>
-                  <p>Date: {experimentDate || "_________"}</p>
+                <div className="header gap-1 flex flex-col">
+                  <p className="section-title font-clashgrotesk font-medium">
+                    Experiment No. : {experimentNumber || ""}
+                  </p>
+                  <p className="section-title font-clashgrotesk font-medium">
+                    Date : {experimentDate || ""}
+                  </p>
                 </div>
 
-                <div className="title">
-                  {experimentTitle || "EXPERIMENT TITLE"}
+                <div className="title font-clashgrotesk font-medium mt-1">
+                  {experimentTitle || "Title : "}
                 </div>
 
-                <div className="section-header">Aim:</div>
-                <div className="content">
-                  {experimentAim || "To be specified..."}
+                <div className="section-header font-clashgrotesk font-medium mt-1">
+                  Aim :{" "}
                 </div>
+                <div className="content">{experimentAim || ""}</div>
 
-                <div className="section-header">Algorithm:</div>
+                <div className="section-header font-clashgrotesk font-medium mt-1">
+                  Algorithm :{" "}
+                </div>
                 <div className="content">
                   <ol>
                     {algorithmSteps.map((step, index) => (
-                      <li key={index}>
-                        {step.text || `Step ${index + 1}`}
+                      <li key={step.id}>
+                        {`${index + 1}. `} {step.text}
                         {step.hasCode && (
                           <div className="code-block">
                             {step.code || "% Enter the Pseudo Code here"}
@@ -345,7 +423,9 @@ export default function Home() {
                   </ol>
                 </div>
 
-                <div className="section-header">Result:</div>
+                <div className="section-header font-clashgrotesk font-medium mt-1">
+                  Result :{" "}
+                </div>
                 <div className="content">
                   {experimentResult ||
                     "Program has been executed successfully and obtained the output."}
@@ -356,18 +436,11 @@ export default function Home() {
         </TabsContent>
       </Tabs>
 
-      <div className="flex mt-6">
+      <div className="mt-6">
         {templateType === "simple" ? (
           <PDFDownloadButton program={program} output={output} />
         ) : (
-          <ExperimentPDFDownloadButton
-            experimentNumber={experimentNumber}
-            experimentDate={experimentDate}
-            experimentTitle={experimentTitle}
-            experimentAim={experimentAim}
-            algorithmSteps={algorithmSteps}
-            experimentResult={experimentResult}
-          />
+          handleExperimentPDFDownload()
         )}
       </div>
     </div>

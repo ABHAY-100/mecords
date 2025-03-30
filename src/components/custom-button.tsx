@@ -35,40 +35,50 @@ export function PDFDownloadButton({ program, output }: SimplePDFProps) {
 }
 
 interface ExperimentPDFProps {
-  experimentNumber: string;
-  experimentDate: string;
-  experimentTitle: string;
-  experimentAim: string;
-  algorithmSteps: AlgorithmStep[];
-  experimentResult: string;
+  experimentData: {
+    experimentNumber: string;
+    experimentDate: string;
+    experimentTitle: string;
+    experimentAim: string;
+    algorithmSteps: AlgorithmStep[];
+    experimentResult: string;
+  };
 }
 
-export function ExperimentPDFDownloadButton({
-  experimentNumber,
-  experimentDate,
-  experimentTitle,
-  experimentAim,
-  algorithmSteps,
-  experimentResult,
-}: ExperimentPDFProps) {
+export function ExperimentPDFDownloadButton({experimentData}: ExperimentPDFProps) {
+  // Create a deep copy of the data to avoid reference issues
+  const safeData = {
+    experimentNumber: experimentData.experimentNumber || '',
+    experimentDate: experimentData.experimentDate || '',
+    experimentTitle: experimentData.experimentTitle || '',
+    experimentAim: experimentData.experimentAim || '',
+    // Create a completely new array with only the needed properties
+    algorithmSteps: (experimentData.algorithmSteps || []).map(step => ({
+      text: String(step.text || ''),
+      hasCode: Boolean(step.hasCode),
+      code: String(step.code || '')
+    })),
+    experimentResult: experimentData.experimentResult || ''
+  };
+  
   return (
     <PDFDownloadLink
       document={
         <ExperimentPDFDocument
-          experimentNumber={experimentNumber}
-          experimentDate={experimentDate}
-          experimentTitle={experimentTitle}
-          experimentAim={experimentAim}
-          algorithmSteps={algorithmSteps}
-          experimentResult={experimentResult}
+          experimentNumber={safeData.experimentNumber}
+          experimentDate={safeData.experimentDate}
+          experimentTitle={safeData.experimentTitle}
+          experimentAim={safeData.experimentAim}
+          algorithmSteps={safeData.algorithmSteps}
+          experimentResult={safeData.experimentResult}
         />
       }
       fileName="experiment-report.pdf"
       className="inline-block"
     >
-      {({ loading }) => (
+      {({loading}) => (
         <Button disabled={loading} className="flex items-center gap-2">
-          <Download size={16} />
+          <Download size={16}/>
           {loading ? "Generating PDF..." : "Download PDF"}
         </Button>
       )}

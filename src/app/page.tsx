@@ -142,7 +142,7 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto py-12 max-w-3xl font-clashgrotesk px-[50px] max-sm:px-[18px]">
+    <div className="container mx-auto min-h-screen py-12 max-w-3xl font-clashgrotesk px-[50px] max-sm:px-[18px]">
       <div className="mb-6 gap-3 flex flex-col">
         <Label htmlFor="template-select">
           <p className="text-[14px] pl-[5px]">Select Template :</p>

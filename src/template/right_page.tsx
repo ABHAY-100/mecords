@@ -40,21 +40,24 @@ const styles = StyleSheet.create({
   header: {
     textAlign: "right",
     marginBottom: "1.5cm",
+    fontSize: 12,
   },
   title: {
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: "Latin Modern Roman",
     marginBottom: "1.5cm",
+    textTransform: "uppercase"
   },
   sectionHeader: {
     fontSize: 14,
     fontFamily: "Latin Modern Roman",
+    textDecoration: "underline",
     marginTop: "1cm",
     marginBottom: "0.5cm",
   },
   content: {
-    marginBottom: "1cm",
+    marginBottom: "0cm",
   },
   codeBlock: {
     backgroundColor: "#f5f5f5",
@@ -89,7 +92,7 @@ export const ExperimentPDFDocument = ({
     <Page size="A4" style={styles.page}>
       {/* Header */}
       <View style={styles.header}>
-        <Text>Experiment No: {experimentNumber || "_____"}</Text>
+        <Text>Experiment No.: {experimentNumber || "_____"}</Text>
         <Text>Date: {experimentDate || "_________"}</Text>
       </View>
 

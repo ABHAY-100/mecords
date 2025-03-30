@@ -21,7 +21,7 @@ export function PDFDownloadButton({ program, output }: SimplePDFProps) {
   return (
     <PDFDownloadLink
       document={<PDFDocument program={program} output={output} />}
-      fileName="document.pdf"
+      fileName="leftside.pdf"
       className="inline-block"
     >
       {({ loading }) => (
@@ -73,7 +73,7 @@ export function ExperimentPDFDownloadButton({experimentData}: ExperimentPDFProps
           experimentResult={safeData.experimentResult}
         />
       }
-      fileName="experiment-report.pdf"
+      fileName="rightside.pdf"
       className="inline-block"
     >
       {({loading}) => (

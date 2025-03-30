@@ -19,7 +19,7 @@ export function Navbar() {
         <div className="flex flex-1 items-center justify-end">
           <div className="flex items-center">
             <a
-              href="https://github.com/ABHAY-100"
+              href="https://github.com/ABHAY-100/mecords"
               target="_blank"
               rel="noreferrer"
               className="flex items-center"

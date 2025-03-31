@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
   },
   content: {
     marginBottom: "-0.2cm",
+    lineHeight: 0.8,
   },
   codeBlock: {
     backgroundColor: "#f5f5f5",

@@ -68,6 +68,7 @@ export default function Home() {
   const [experimentResult, setExperimentResult] = useState(
     "Program has been executed successfully and obtained the output."
   );
+  const [resultOnNewPage, setResultOnNewPage] = useState(false);
 
   const addAlgorithmStep = (index: number) => {
     setAlgorithmSteps((prev) => {
@@ -136,6 +137,7 @@ export default function Home() {
             experimentAim: experimentAim || "",
             algorithmSteps: validatedSteps,
             experimentResult: experimentResult || "",
+            resultOnNewPage: resultOnNewPage,
           }}
         />
       );
@@ -442,6 +444,36 @@ export default function Home() {
                   value={experimentResult}
                   onChange={(e) => setExperimentResult(e.target.value)}
                 />
+                
+                <div className="flex items-center gap-4 mt-4 ml-1">
+                  <p className="text-sm">Need the result on a new page? :</p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      id="same-page"
+                      name="result-page"
+                      checked={!resultOnNewPage}
+                      onChange={() => setResultOnNewPage(false)}
+                      className="mr-1"
+                    />
+                    <Label htmlFor="same-page" className="text-sm">
+                      Nah 🙅
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      id="new-page"
+                      name="result-page"
+                      checked={resultOnNewPage}
+                      onChange={() => setResultOnNewPage(true)}
+                      className="mr-1"
+                    />
+                    <Label htmlFor="new-page" className="text-sm">
+                      Yup 🆕
+                    </Label>
+                  </div>
+                </div>
               </div>
             </div>
           )}

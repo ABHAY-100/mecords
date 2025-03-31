@@ -27,6 +27,7 @@ interface ExperimentPDFDocumentProps {
   experimentAim: string;
   algorithmSteps: AlgorithmStep[];
   experimentResult: string;
+  resultOnNewPage: boolean;
 }
 
 // Create styles
@@ -91,6 +92,7 @@ export const ExperimentPDFDocument = ({
   experimentAim,
   algorithmSteps,
   experimentResult,
+  resultOnNewPage,
 }: ExperimentPDFDocumentProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
@@ -131,15 +133,33 @@ export const ExperimentPDFDocument = ({
         ))}
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text>Result:</Text>
-      </View>
-      <View style={styles.content}>
-        <Text>
-          {experimentResult ||
-            "Program has been executed successfully and obtained the output"}
-        </Text>
-      </View>
+      {!resultOnNewPage && (
+        <>
+          <View style={styles.sectionHeader}>
+            <Text>Result:</Text>
+          </View>
+          <View style={styles.content}>
+            <Text>
+              {experimentResult ||
+                "Program has been executed successfully and obtained the output"}
+            </Text>
+          </View>
+        </>
+      )}
     </Page>
+
+    {resultOnNewPage && (
+      <Page size="A4" style={styles.page}>
+        <View style={{...styles.sectionHeader, marginTop: "2cm"}}>
+          <Text>Result:</Text>
+        </View>
+        <View style={styles.content}>
+          <Text>
+            {experimentResult ||
+              "Program has been executed successfully and obtained the output"}
+          </Text>
+        </View>
+      </Page>
+    )}
   </Document>
 );

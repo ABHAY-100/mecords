@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
 
 interface PDFDocumentProps {
   program: string;
-  output: string;
+  output?: string;
   image?: string;
 }
 
@@ -63,19 +63,23 @@ export const PDFDocument = ({ program, output, image }: PDFDocumentProps) => (
         <Text>{program || "% paste program here"}</Text>
       </View>
 
-      <View style={styles.sectionTitle}>
-        <Text>Output</Text>
-      </View>
-      {image && (
+      {(output || image) && (
         <>
-          <View style={styles.imageContainer}>
-            <Image src={image} style={styles.image} />
+          <View style={styles.sectionTitle}>
+            <Text>Output</Text>
           </View>
+          {image && (
+            <View style={styles.imageContainer}>
+              <Image src={image} style={styles.image} />
+            </View>
+          )}
+          {output && (
+            <View style={styles.code}>
+              <Text>{output}</Text>
+            </View>
+          )}
         </>
       )}
-      <View style={styles.code}>
-        <Text>{output || "% paste output here"}</Text>
-      </View>
     </Page>
   </Document>
 );

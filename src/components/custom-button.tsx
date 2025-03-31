@@ -14,7 +14,7 @@ interface AlgorithmStep {
 
 interface SimplePDFProps {
   program: string;
-  output: string;
+  output?: string;
   image?: string;
 }
 
@@ -24,10 +24,13 @@ export function PDFDownloadButton({ program, output, image }: SimplePDFProps) {
       ? image
       : undefined;
 
+  // Make sure output is only passed if it has content
+  const safeOutput = output && output.trim() !== "" ? output : undefined;
+
   return (
     <PDFDownloadLink
       document={
-        <PDFDocument program={program} output={output} image={safeImage} />
+        <PDFDocument program={program} output={safeOutput} image={safeImage} />
       }
       fileName="leftside.pdf"
       className="inline-block"
@@ -61,6 +64,7 @@ interface ExperimentPDFProps {
     experimentAim: string;
     algorithmSteps: AlgorithmStep[];
     experimentResult: string;
+    resultOnNewPage: boolean;
   };
 }
 
@@ -78,6 +82,7 @@ export function ExperimentPDFDownloadButton({
       code: String(step.code || ""),
     })),
     experimentResult: experimentData.experimentResult || "",
+    resultOnNewPage: Boolean(experimentData.resultOnNewPage),
   };
 
   return (
@@ -90,6 +95,7 @@ export function ExperimentPDFDownloadButton({
           experimentAim={safeData.experimentAim}
           algorithmSteps={safeData.algorithmSteps}
           experimentResult={safeData.experimentResult}
+          resultOnNewPage={safeData.resultOnNewPage}
         />
       }
       fileName="rightside.pdf"

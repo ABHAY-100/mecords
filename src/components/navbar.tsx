@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Github, Star } from "lucide-react";
+import { Github } from "lucide-react";
 import LikeButton from "@/components/like-button";
 
 export function Navbar() {

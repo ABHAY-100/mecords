@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Github, Star } from "lucide-react";
+import LikeButton from "@/components/like-button";
 
 export function Navbar() {
   return (
@@ -17,7 +18,7 @@ export function Navbar() {
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end">
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <a
               href="https://github.com/ABHAY-100/mecords"
               target="_blank"
@@ -29,13 +30,15 @@ export function Navbar() {
                 size="sm"
                 className="h-8 gap-[6px] font-clashgrotesk"
               >
-                <Star className="h-4 w-4 max-[400px]:hidden scale-[0.95]" />
-                <Github className="h-4 w-4 min-[400px]:hidden" />
+                {/* <Star className="h-4 w-4 max-[400px]:hidden scale-[0.95]" /> */}
+                <Github className="h-3 w-3 min-[400px]" />
                 <span className="pt-[3px] text-[15px] max-[400px]:hidden">
-                  Star on GitHub
+                  GitHub
                 </span>
               </Button>
             </a>
+
+            <LikeButton />
           </div>
         </div>
       </div>

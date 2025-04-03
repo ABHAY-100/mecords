@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import type React from "react";
+
+import { useState, useRef, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -13,17 +15,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, X } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  X,
+  FileText,
+  Binary,
+  FileCode,
+  Calendar,
+  Hash,
+  FileOutput,
+  Target,
+  ListOrdered,
+  CheckCircle2,
+  ImageIcon,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 
 const PDFDownloadButton = dynamic(
   () =>
     import("@/components/custom-button").then((mod) => mod.PDFDownloadButton),
   {
     ssr: false,
-    loading: () => <Button disabled>Loading PDF...</Button>,
+    // loading: () => <Button disabled>Loading PDF...</Button>,
   }
 );
 
@@ -34,7 +52,7 @@ const ExperimentPDFDownloadButton = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <Button disabled>Loading PDF...</Button>,
+    // loading: () => <Button disabled>Loading PDF...</Button>,
   }
 );
 
@@ -114,7 +132,6 @@ export default function Home() {
     if (typeof window === "undefined") return null;
 
     try {
-      // Use a try/catch inside the validation as well
       let validatedSteps;
       try {
         validatedSteps = algorithmSteps.map((step) => ({
@@ -128,18 +145,20 @@ export default function Home() {
       }
 
       return (
-        <ExperimentPDFDownloadButton
-          key={`pdf-${algorithmSteps.length}-${Date.now()}`}
-          experimentData={{
-            experimentNumber: experimentNumber || "",
-            experimentDate: experimentDate || "",
-            experimentTitle: experimentTitle || "",
-            experimentAim: experimentAim || "",
-            algorithmSteps: validatedSteps,
-            experimentResult: experimentResult || "",
-            resultOnNewPage: resultOnNewPage,
-          }}
-        />
+        <Suspense fallback={<Button disabled>Loading PDF...</Button>}>
+          <ExperimentPDFDownloadButton
+            key={`pdf-${algorithmSteps.length}-${Date.now()}`}
+            experimentData={{
+              experimentNumber: experimentNumber || "",
+              experimentDate: experimentDate || "",
+              experimentTitle: experimentTitle || "",
+              experimentAim: experimentAim || "",
+              algorithmSteps: validatedSteps,
+              experimentResult: experimentResult || "",
+              resultOnNewPage: resultOnNewPage,
+            }}
+          />
+        </Suspense>
       );
     } catch (error) {
       console.error("PDF Generation Error:", error);
@@ -180,395 +199,482 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto min-h-screen py-12 max-w-3xl font-clashgrotesk px-[50px] max-sm:px-[18px]">
-      <div className="mb-6 gap-3 flex flex-col">
-        <Label htmlFor="template-select">
-          <p className="text-[14px] pl-[5px]">Select Template :</p>
-        </Label>
-        <Select
-          value={templateType}
-          onValueChange={(value: "simple" | "experiment") =>
-            setTemplateType(value)
-          }
-        >
-          <SelectTrigger
-            id="template-select"
-            className="w-full font-normal font-clashgrotesk overflow-hidden"
-          >
-            <SelectValue placeholder="Select template type" />
-          </SelectTrigger>
-          <SelectContent className="font-normal font-clashgrotesk overflow-auto">
-            <SelectItem value="experiment">Aim, Algorithm & Result</SelectItem>
-            <SelectItem value="simple">Program & Output</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="container mx-auto min-h-screen py-10 max-w-4xl px-4 sm:px-6">
+      <Card className="mb-8 shadow-sm border-slate-200">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+            <div className="flex-1">
+              <Label
+                htmlFor="template-select"
+                className="text-sm font-medium mb-1.5"
+              >
+                Select Experiment Component
+              </Label>
+              <Select
+                value={templateType}
+                onValueChange={(value: "simple" | "experiment") =>
+                  setTemplateType(value)
+                }
+              >
+                <SelectTrigger
+                  id="template-select"
+                  className="w-full mt-1 bg-slate-50"
+                >
+                  <SelectValue placeholder="Select template type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value="experiment"
+                    className="flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>Aim, Algorithm & Result</span>
+                  </SelectItem>
+                  <SelectItem
+                    value="simple"
+                    className="flex items-center gap-2"
+                  >
+                    <FileCode className="h-4 w-4" />
+                    <span>Program & Output</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="editor" className="w-full">
-        <div className="ml-2">
-          <TabsList className="mb-4">
-            <TabsTrigger value="editor">Editor</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList className="grid grid-cols-2 w-[200px] mb-6">
+          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+        </TabsList>
 
         <TabsContent value="editor">
-          {templateType === "simple" ? (
-            <div className="grid gap-6 mb-6">
-              <div>
-                <Label
-                  htmlFor="program"
-                  className="block text-sm font-medium mb-2"
-                >
-                  <p className="text-[14px] pl-[5px]">Program :</p>
-                </Label>
-                <Textarea
-                  id="program"
-                  placeholder="Paste your program code here..."
-                  className="min-h-[200px] font-mono"
-                  value={program}
-                  onChange={(e) => setProgram(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label
-                  htmlFor="output"
-                  className="block text-sm font-medium mb-2"
-                >
-                  <p className="text-[14px] pl-[5px]">Output :</p>
-                </Label>
-                <Textarea
-                  id="output"
-                  placeholder="Paste your program output here..."
-                  className="min-h-[200px] font-mono"
-                  value={output}
-                  onChange={(e) => setOutput(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label
-                  htmlFor="output-image"
-                  className="block text-sm font-medium mb-2"
-                >
-                  <p className="text-[14px] pl-[5px]">
-                    Output Image (optional) :
-                  </p>
-                </Label>
-                <div className="flex flex-col gap-2">
-                  <Input
-                    ref={fileInputRef}
-                    id="output-image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="mb-2"
-                  />
-
-                  {outputImage && (
-                    <div className="relative border rounded p-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-2 right-2 bg-white/80 rounded-full"
-                        onClick={removeImage}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                      <Image
-                        src={outputImage}
-                        alt="Output Preview"
-                        className="max-h-[200px] object-contain mx-auto"
-                        width={400}
-                        height={200}
-                        style={{ objectFit: "contain", maxHeight: "200px" }}
-                      />
+          <Card className="shadow-sm border-slate-200">
+            <CardContent className="pt-6">
+              {templateType === "simple" ? (
+                <div className="grid gap-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Binary className="h-4 w-4 text-slate-500" />
+                      <Label htmlFor="program" className="font-medium">
+                        Program
+                      </Label>
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-6 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label
-                    htmlFor="exp-number"
-                    className="block text-sm font-medium mb-2"
-                  >
-                    <p className="text-[14px] pl-[5px]">Exp. No. : </p>
-                  </Label>
-                  <Input
-                    id="exp-number"
-                    placeholder="e.g., 1"
-                    value={experimentNumber}
-                    onChange={(e) => setExperimentNumber(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label
-                    htmlFor="exp-date"
-                    className="block text-sm font-medium mb-2"
-                  >
-                    <p className="text-[14px] pl-[5px]">Date : </p>
-                  </Label>
-                  <Input
-                    id="exp-date"
-                    type="date"
-                    value={experimentDate}
-                    onChange={(e) => setExperimentDate(e.target.value)}
-                  />
-                </div>
-              </div>
+                    <Textarea
+                      id="program"
+                      placeholder="Paste your program code here..."
+                      className="min-h-[200px] font-mono bg-slate-50"
+                      value={program}
+                      onChange={(e) => setProgram(e.target.value)}
+                    />
+                  </div>
 
-              <div>
-                <Label
-                  htmlFor="exp-title"
-                  className="block text-sm font-medium mb-2"
-                >
-                  <p className="text-[14px] pl-[5px]">Title : </p>
-                </Label>
-                <Input
-                  id="exp-title"
-                  placeholder="e.g., Polynomial Addition"
-                  value={experimentTitle}
-                  onChange={(e) => setExperimentTitle(e.target.value)}
-                />
-              </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileOutput className="h-4 w-4 text-slate-500" />
+                      <Label htmlFor="output" className="font-medium">
+                        Output (optional)
+                      </Label>
+                    </div>
+                    <Textarea
+                      id="output"
+                      placeholder="Paste your program output here..."
+                      className="min-h-[150px] font-mono bg-slate-50"
+                      value={output}
+                      onChange={(e) => setOutput(e.target.value)}
+                    />
+                  </div>
 
-              <div>
-                <Label
-                  htmlFor="exp-aim"
-                  className="block text-sm font-medium mb-2"
-                >
-                  <p className="text-[14px] pl-[5px]">Aim : </p>
-                </Label>
-                <Textarea
-                  id="exp-aim"
-                  placeholder="e.g., To read two polynomials and store them in an array. Calculate the sum of the two polynomials."
-                  className="min-h-[100px]"
-                  value={experimentAim}
-                  onChange={(e) => setExperimentAim(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label className="block text-sm font-medium mb-2">
-                  <p className="text-[14px] pl-[5px]">Algorithm : </p>
-                </Label>
-                <div className="border rounded-md p-4 space-y-4">
-                  {algorithmSteps.map((step, index) => (
-                    <div
-                      key={index}
-                      className="space-y-3 pb-4 border-b last:border-b-0"
-                    >
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <ImageIcon className="h-4 w-4 text-slate-500" />
+                      <Label htmlFor="output-image" className="font-medium">
+                        Output Image (optional)
+                      </Label>
+                    </div>
+                    <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{index + 1}.</span>
-                        <Input
-                          placeholder="Step description"
-                          value={step.text}
-                          onChange={(e) =>
-                            updateAlgorithmStep(index, "text", e.target.value)
-                          }
-                          className="flex-1"
-                        />
                         <Button
                           variant="outline"
-                          size="icon"
-                          onClick={() => addAlgorithmStep(index)}
-                          title="Add step after this"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="bg-slate-50"
                         >
-                          <Plus className="h-4 w-4" />
+                          Choose Image
                         </Button>
-                        {algorithmSteps.length > 2 && (
+                        <Input
+                          ref={fileInputRef}
+                          id="output-image"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          {outputImage ? "Image selected" : "No image selected"}
+                        </p>
+                      </div>
+
+                      {outputImage && (
+                        <div className="relative border rounded-md p-4 mt-2 bg-slate-50">
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="icon"
-                            onClick={() => removeAlgorithmStep(index)}
-                            title="Remove this step"
+                            className="absolute top-2 right-2 bg-white/80 rounded-full hover:bg-red-50 hover:text-red-500"
+                            onClick={removeImage}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <X className="h-4 w-4" />
                           </Button>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 ml-6">
-                        <input
-                          type="checkbox"
-                          id={`has-code-${index}`}
-                          checked={step.hasCode}
-                          onChange={(e) =>
-                            updateAlgorithmStep(
-                              index,
-                              "hasCode",
-                              e.target.checked
-                            )
-                          }
-                          className="mr-2"
-                        />
-                        <Label
-                          htmlFor={`has-code-${index}`}
-                          className="text-sm"
-                        >
-                          Include code block
-                        </Label>
-                      </div>
-
-                      {step.hasCode && (
-                        <Textarea
-                          placeholder="Enter code or pseudo-code here..."
-                          value={step.code}
-                          onChange={(e) =>
-                            updateAlgorithmStep(index, "code", e.target.value)
-                          }
-                          className="ml-6 font-mono min-h-[100px]"
-                        />
+                          <Image
+                            src={outputImage || "/placeholder.svg"}
+                            alt="Output Preview"
+                            className="max-h-[200px] object-contain mx-auto"
+                            width={400}
+                            height={200}
+                            style={{ objectFit: "contain", maxHeight: "200px" }}
+                          />
+                        </div>
                       )}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="grid gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Hash className="h-4 w-4 text-slate-500" />
+                        <Label htmlFor="exp-number" className="font-medium">
+                          Experiment Number
+                        </Label>
+                      </div>
+                      <Input
+                        id="exp-number"
+                        placeholder="e.g., 1"
+                        value={experimentNumber}
+                        onChange={(e) => setExperimentNumber(e.target.value)}
+                        className="bg-slate-50"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="h-4 w-4 text-slate-500" />
+                        <Label htmlFor="exp-date" className="font-medium">
+                          Date
+                        </Label>
+                      </div>
+                      <Input
+                        id="exp-date"
+                        type="date"
+                        value={experimentDate}
+                        onChange={(e) => setExperimentDate(e.target.value)}
+                        className="bg-slate-50"
+                      />
+                    </div>
+                  </div>
 
-              <div>
-                <Label
-                  htmlFor="exp-result"
-                  className="block text-sm font-medium mb-2"
-                >
-                  <p className="text-[14px] pl-[5px]">Result : </p>
-                </Label>
-                <Textarea
-                  id="exp-result"
-                  placeholder="e.g., Program has been executed successfully and obtained the output."
-                  className="min-h-[100px]"
-                  value={experimentResult}
-                  onChange={(e) => setExperimentResult(e.target.value)}
-                />
-                
-                <div className="flex items-center gap-4 mt-4 ml-1">
-                  <p className="text-sm">Need the result on a new page? :</p>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      id="same-page"
-                      name="result-page"
-                      checked={!resultOnNewPage}
-                      onChange={() => setResultOnNewPage(false)}
-                      className="mr-1"
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="h-4 w-4 text-slate-500" />
+                      <Label htmlFor="exp-title" className="font-medium">
+                        Title
+                      </Label>
+                    </div>
+                    <Input
+                      id="exp-title"
+                      placeholder="e.g., Polynomial Addition"
+                      value={experimentTitle}
+                      onChange={(e) => setExperimentTitle(e.target.value)}
+                      className="bg-slate-50"
                     />
-                    <Label htmlFor="same-page" className="text-sm">
-                      Nah 🙅
-                    </Label>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      id="new-page"
-                      name="result-page"
-                      checked={resultOnNewPage}
-                      onChange={() => setResultOnNewPage(true)}
-                      className="mr-1"
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="h-4 w-4 text-slate-500" />
+                      <Label htmlFor="exp-aim" className="font-medium">
+                        Aim
+                      </Label>
+                    </div>
+                    <Textarea
+                      id="exp-aim"
+                      placeholder="e.g., To read two polynomials and store them in an array. Calculate the sum of the two polynomials."
+                      className="min-h-[100px] bg-slate-50"
+                      value={experimentAim}
+                      onChange={(e) => setExperimentAim(e.target.value)}
                     />
-                    <Label htmlFor="new-page" className="text-sm">
-                      Yup 🆕
-                    </Label>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <ListOrdered className="h-4 w-4 text-slate-500" />
+                      <Label className="font-medium">Algorithm</Label>
+                    </div>
+                    <Card className="border border-slate-200 bg-slate-50 shadow-none">
+                      <CardContent className="p-4 space-y-4">
+                        {algorithmSteps.map((step, index) => (
+                          <div
+                            key={index}
+                            className="space-y-3 pb-4 border-b last:border-b-0 last:pb-0"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-medium text-sm">
+                                {index + 1}
+                              </div>
+                              <Input
+                                placeholder="Step description"
+                                value={step.text}
+                                onChange={(e) =>
+                                  updateAlgorithmStep(
+                                    index,
+                                    "text",
+                                    e.target.value
+                                  )
+                                }
+                                className="flex-1 bg-white"
+                              />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => addAlgorithmStep(index)}
+                                title="Add step after this"
+                                className="h-8 w-8"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                              {algorithmSteps.length > 2 && (
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => removeAlgorithmStep(index)}
+                                  title="Remove this step"
+                                  className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2 ml-8">
+                              <div className="flex items-center space-x-2">
+                                <Switch
+                                  id={`has-code-${index}`}
+                                  checked={step.hasCode}
+                                  onCheckedChange={(checked) =>
+                                    updateAlgorithmStep(
+                                      index,
+                                      "hasCode",
+                                      checked
+                                    )
+                                  }
+                                />
+                                <Label
+                                  htmlFor={`has-code-${index}`}
+                                  className="text-sm"
+                                >
+                                  Include code block
+                                </Label>
+                              </div>
+                            </div>
+
+                            {step.hasCode && (
+                              <div className="ml-8 relative">
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-200 rounded-full"></div>
+                                <Textarea
+                                  placeholder="Enter code or pseudo-code here..."
+                                  value={step.code}
+                                  onChange={(e) =>
+                                    updateAlgorithmStep(
+                                      index,
+                                      "code",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="pl-4 font-mono min-h-[100px] bg-white"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-4 w-4 text-slate-500" />
+                      <Label htmlFor="exp-result" className="font-medium">
+                        Result
+                      </Label>
+                    </div>
+                    <Textarea
+                      id="exp-result"
+                      placeholder="e.g., Program has been executed successfully and obtained the output."
+                      className="min-h-[100px] bg-slate-50"
+                      value={experimentResult}
+                      onChange={(e) => setExperimentResult(e.target.value)}
+                    />
+
+                    <div className="flex items-center gap-4 mt-4">
+                      <Label
+                        htmlFor="result-new-page"
+                        className="text-sm font-medium"
+                      >
+                        Start Result on a New Page
+                      </Label>
+                      <Switch
+                        id="result-new-page"
+                        checked={resultOnNewPage}
+                        onCheckedChange={setResultOnNewPage}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="preview">
-          <Card className="p-6 mb-6 mx-auto bg-zinc-100">
-            {templateType === "simple" ? (
-              <div className="a4-preview simple-template">
-                <div className="section-title font-clashgrotesk font-medium">
-                  Program :
-                </div>
-                <pre className="code mt-1 font-normal text-zinc-700">
-                  {program || "% paste program here"}
-                </pre>
+          <Card className="shadow-sm border-slate-200">
+            <CardContent className="p-6">
+              <div className="bg-white border border-slate-200 rounded-md p-8 shadow-sm max-w-[800px] mx-auto">
+                {templateType === "simple" ? (
+                  <div className="a4-preview simple-template">
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                        <Binary className="h-4.5 w-4.5 text-slate-500" />
+                        Program
+                      </h3>
+                      <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
+                        <pre className="whitespace-pre-wrap font-mono text-sm text-slate-800">
+                          {program || "// program"}
+                        </pre>
+                      </div>
+                    </div>
 
-                {outputImage && (
-                  <div className="mt-5">
-                    <Image
-                      src={outputImage}
-                      alt="Output Preview"
-                      className="mx-auto border border-gray-200"
-                      width={400}
-                      height={200}
-                      style={{ objectFit: "contain", maxHeight: "200px" }}
-                    />
-                  </div>
-                )}
-
-                <div className="section-title font-clashgrotesk font-medium mt-5">
-                  Output :{" "}
-                </div>
-                <pre className="code mt-1 font-normal text-zinc-700">
-                  {output || "% paste output here"}
-                </pre>
-              </div>
-            ) : (
-              <div className="a4-preview experiment-template">
-                <div className="header gap-1 flex flex-col">
-                  <p className="section-title font-clashgrotesk font-medium">
-                    Experiment No. : {experimentNumber || ""}
-                  </p>
-                  <p className="section-title font-clashgrotesk font-medium">
-                    Date : {experimentDate || ""}
-                  </p>
-                </div>
-
-                <div className="title font-clashgrotesk font-medium mt-1">
-                  {experimentTitle || "Title : "}
-                </div>
-
-                <div className="section-header font-clashgrotesk font-medium mt-1">
-                  Aim :{" "}
-                </div>
-                <div className="content">{experimentAim || ""}</div>
-
-                <div className="section-header font-clashgrotesk font-medium mt-1">
-                  Algorithm :{" "}
-                </div>
-                <div className="content">
-                  <ol>
-                    {algorithmSteps.map((step, index) => (
-                      <li key={step.id}>
-                        {`${index + 1}. `} {step.text}
-                        {step.hasCode && (
-                          <div className="code-block">
-                            {step.code || "% Enter the Pseudo Code here"}
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                        <FileOutput className="h-4.5 w-4.5 text-slate-500" />
+                        Output
+                      </h3>
+                      <div className="flex flex-col gap-2.5">
+                        {outputImage && (
+                          <div>
+                            <div className="bg-slate-50 p-4 rounded-md border border-slate-200 flex justify-center">
+                              <Image
+                                src={outputImage || "/placeholder.svg"}
+                                alt="Output Preview"
+                                className="max-h-[200px] object-contain"
+                                width={400}
+                                height={200}
+                                style={{
+                                  objectFit: "contain",
+                                  maxHeight: "200px",
+                                }}
+                              />
+                            </div>
                           </div>
                         )}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
+                        <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
+                          <pre className="whitespace-pre-wrap font-mono text-sm text-slate-800">
+                            {output || "// output"}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="a4-preview experiment-template">
+                    <div className="flex justify-between items-start mb-6">
+                      <div>
+                        <h2 className="text-2xl font-bold">
+                          {experimentTitle || "Experiment Title"}
+                        </h2>
+                      </div>
+                      <div className="text-right text-sm flex gap-1 flex-col text-slate-600">
+                        <p>
+                          <span className="font-medium">Experiment No:</span>{" "}
+                          {experimentNumber || "N/A"}
+                        </p>
+                        <p>
+                          <span className="font-medium">Date:</span>{" "}
+                          {experimentDate || "N/A"}
+                        </p>
+                      </div>
+                    </div>
 
-                <div className="section-header font-clashgrotesk font-medium mt-1">
-                  Result :{" "}
-                </div>
-                <div className="content">
-                  {experimentResult ||
-                    "Program has been executed successfully and obtained the output."}
-                </div>
+                    <Separator className="mb-6" />
+
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                        <Target className="h-4.5 w-4.5 text-slate-500" />
+                        Aim
+                      </h3>
+                      <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
+                        <p className="text-slate-800">
+                          {experimentAim ||
+                            "The aim of the experiment is not specified!..."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                        <ListOrdered className="h-4.5 w-4.5 text-slate-500" />
+                        Algorithm
+                      </h3>
+                      <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
+                        <ol className="list-decimal pl-5 space-y-3">
+                          {algorithmSteps.map((step, index) => (
+                            <li key={index} className="text-slate-800">
+                              {step.text}
+                              {step.hasCode && (
+                                <div className="mt-2 bg-white p-3 rounded border border-slate-200 font-mono text-sm">
+                                  <pre className="whitespace-pre-wrap">
+                                    {step.code || "// Code will appear here"}
+                                  </pre>
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                        <CheckCircle2 className="h-4.5 w-4.5 text-slate-500" />
+                        Result
+                      </h3>
+                      <div className="bg-slate-50 p-4 rounded-md border border-slate-200">
+                        <p className="text-slate-800">
+                          {experimentResult ||
+                            "The result of the experiment will appear here"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      <div className="mt-4">
+      <div className="mt-8 flex justify-center">
         {templateType === "simple" ? (
-          <PDFDownloadButton
-            key={`pdf-${outputImage ? "with-image" : "no-image"}-${Date.now()}`}
-            program={program}
-            output={output}
-            image={outputImage || undefined}
-          />
+          <Suspense fallback={<Button disabled>Loading PDF...</Button>}>
+            <PDFDownloadButton
+              key={`pdf-${
+                outputImage ? "with-image" : "no-image"
+              }-${Date.now()}`}
+              program={program}
+              output={output}
+              image={outputImage || undefined}
+            />
+          </Suspense>
         ) : (
           handleExperimentPDFDownload()
         )}

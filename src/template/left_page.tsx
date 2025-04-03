@@ -60,7 +60,7 @@ export const PDFDocument = ({ program, output, image }: PDFDocumentProps) => (
         <Text>Program</Text>
       </View>
       <View style={styles.code}>
-        <Text>{program || "% paste program here"}</Text>
+        <Text>{program || "// program"}</Text>
       </View>
 
       {(output || image) && (

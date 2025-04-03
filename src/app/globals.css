@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+* {
+  font-family: var(--font-clashgrotesk);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -11,7 +11,7 @@ export function Navbar() {
             href="/"
             className="flex items-center space-x-2 font-clashgrotesk"
           >
-            <span className="font-medium text-[28px] font-clashgrotesk max-md:text-[26px] max-sm:mr-2">
+            <span className="font-medium text-[30px] font-clashgrotesk max-md:text-[27px] max-sm:mr-2">
               {"< Mecords />"}
             </span>
           </Link>
@@ -29,7 +29,7 @@ export function Navbar() {
                 size="sm"
                 className="h-8 gap-[6px] font-clashgrotesk"
               >
-                <Star className="h-4 w-4 max-[400px]:hidden scale-[0.97]" />
+                <Star className="h-4 w-4 max-[400px]:hidden scale-[0.95]" />
                 <Github className="h-4 w-4 min-[400px]:hidden" />
                 <span className="pt-[3px] text-[15px] max-[400px]:hidden">
                   Star on GitHub

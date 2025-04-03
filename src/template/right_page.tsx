@@ -99,7 +99,7 @@ export const ExperimentPDFDocument = ({
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
         <Text>Experiment No.: {experimentNumber || "_____"}</Text>
-        <Text>Date: {experimentDate || "_________"}</Text>
+        <Text>Date: {experimentDate || "______"}</Text>
       </View>
 
       <View style={styles.title}>
@@ -110,7 +110,7 @@ export const ExperimentPDFDocument = ({
         <Text>Aim:</Text>
       </View>
       <View style={styles.content}>
-        <Text>{experimentAim || "To be specified..."}</Text>
+        <Text>{experimentAim || "The aim of the experiment is not specified!..."}</Text>
       </View>
 
       <View style={styles.sectionHeader}>

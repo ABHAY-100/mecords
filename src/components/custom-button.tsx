@@ -24,7 +24,6 @@ export function PDFDownloadButton({ program, output, image }: SimplePDFProps) {
       ? image
       : undefined;
 
-  // Make sure output is only passed if it has content
   const safeOutput = output && output.trim() !== "" ? output : undefined;
 
   return (

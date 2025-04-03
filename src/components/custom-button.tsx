@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { PDFDocument } from "@/template/left_page";
 import { ExperimentPDFDocument } from "@/template/right_page";
-import { Download } from "lucide-react";
+import { Download, FileDown } from "lucide-react";
 
 interface AlgorithmStep {
   text: string;
@@ -19,12 +20,32 @@ interface SimplePDFProps {
 }
 
 export function PDFDownloadButton({ program, output, image }: SimplePDFProps) {
+  const [isActive, setIsActive] = useState(false);
+  const [isArtificialLoading, setIsArtificialLoading] = useState(false);
+
   const safeImage =
     typeof image === "string" && image.startsWith("data:image/")
       ? image
       : undefined;
 
   const safeOutput = output && output.trim() !== "" ? output : undefined;
+
+  if (!isActive) {
+    return (
+      <Button
+        onClick={() => {
+          setIsActive(true);
+          setIsArtificialLoading(true);
+          setTimeout(() => setIsArtificialLoading(false), 1000);
+        }}
+        className="flex items-center gap-2"
+        variant="outline"
+      >
+        <Download size={16} />
+        Generate PDF
+      </Button>
+    );
+  }
 
   return (
     <PDFDownloadLink
@@ -38,16 +59,26 @@ export function PDFDownloadButton({ program, output, image }: SimplePDFProps) {
         if (error) {
           console.error("PDF generation error:", error);
           return (
-            <Button variant="destructive" className="flex items-center gap-2">
+            <Button
+              variant="destructive"
+              className="flex items-center gap-2"
+              onClick={() => setIsActive(false)}
+            >
               <Download size={16} />
-              Error generating PDF
+              Error - Try Again
             </Button>
           );
         }
         return (
-          <Button disabled={loading} className="flex items-center gap-2">
-            <Download size={16} />
-            {loading ? "Generating PDF..." : "Download PDF"}
+          <Button
+            disabled={loading || isArtificialLoading}
+            className="flex items-center gap-2"
+            variant={loading || isArtificialLoading ? "secondary" : "default"}
+          >
+            <FileDown size={16} />
+            {loading || isArtificialLoading
+              ? "Preparing PDF..."
+              : "Download PDF"}
           </Button>
         );
       }}
@@ -70,6 +101,9 @@ interface ExperimentPDFProps {
 export function ExperimentPDFDownloadButton({
   experimentData,
 }: ExperimentPDFProps) {
+  const [isActive, setIsActive] = useState(false);
+  const [isArtificialLoading, setIsArtificialLoading] = useState(false);
+
   const safeData = {
     experimentNumber: experimentData.experimentNumber || "",
     experimentDate: experimentData.experimentDate || "",
@@ -83,6 +117,23 @@ export function ExperimentPDFDownloadButton({
     experimentResult: experimentData.experimentResult || "",
     resultOnNewPage: Boolean(experimentData.resultOnNewPage),
   };
+
+  if (!isActive) {
+    return (
+      <Button
+        onClick={() => {
+          setIsActive(true);
+          setIsArtificialLoading(true);
+          setTimeout(() => setIsArtificialLoading(false), 1000);
+        }}
+        className="flex items-center gap-2"
+        variant="outline"
+      >
+        <Download size={16} />
+        Generate PDF
+      </Button>
+    );
+  }
 
   return (
     <PDFDownloadLink
@@ -100,12 +151,33 @@ export function ExperimentPDFDownloadButton({
       fileName="rightside.pdf"
       className="inline-block"
     >
-      {({ loading }) => (
-        <Button disabled={loading} className="flex items-center gap-2">
-          <Download size={16} />
-          {loading ? "Generating PDF..." : "Download PDF"}
-        </Button>
-      )}
+      {({ loading, error }) => {
+        if (error) {
+          console.error("PDF generation error:", error);
+          return (
+            <Button
+              variant="destructive"
+              className="flex items-center gap-2"
+              onClick={() => setIsActive(false)}
+            >
+              <Download size={16} />
+              Error - Try Again
+            </Button>
+          );
+        }
+        return (
+          <Button
+            disabled={loading || isArtificialLoading}
+            className="flex items-center gap-2"
+            variant={loading || isArtificialLoading ? "secondary" : "default"}
+          >
+            <FileDown size={16} />
+            {loading || isArtificialLoading
+              ? "Preparing PDF..."
+              : "Download PDF"}
+          </Button>
+        );
+      }}
     </PDFDownloadLink>
   );
 }

@@ -30,14 +30,12 @@ export function Navbar() {
                 size="sm"
                 className="h-8 gap-[6px] font-clashgrotesk"
               >
-                {/* <Star className="h-4 w-4 max-[400px]:hidden scale-[0.95]" /> */}
                 <Github className="h-3 w-3 min-[400px]" />
                 <span className="pt-[3px] text-[15px] max-[400px]:hidden">
                   GitHub
                 </span>
               </Button>
             </a>
-
             <LikeButton />
           </div>
         </div>

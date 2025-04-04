@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { PDFDocument } from "@/template/left_page";
@@ -18,11 +18,23 @@ interface SimplePDFProps {
   program: string;
   output?: string;
   image?: string;
+  resetTrigger?: string | number | Record<string, unknown>;
 }
 
-export function PDFDownloadButton({ program, output, image }: SimplePDFProps) {
+export function PDFDownloadButton({
+  program,
+  output,
+  image,
+  resetTrigger,
+}: SimplePDFProps) {
   const [isActive, setIsActive] = useState(false);
   const [isArtificialLoading, setIsArtificialLoading] = useState(false);
+
+  useEffect(() => {
+    if (isActive) {
+      setIsActive(false);
+    }
+  }, [resetTrigger, isActive]);
 
   const safeImage =
     typeof image === "string" && image.startsWith("data:image/")
@@ -97,13 +109,21 @@ interface ExperimentPDFProps {
     experimentResult: string;
     resultOnNewPage: boolean;
   };
+  resetTrigger?: string | number | Record<string, unknown>;
 }
 
 export function ExperimentPDFDownloadButton({
   experimentData,
+  resetTrigger,
 }: ExperimentPDFProps) {
   const [isActive, setIsActive] = useState(false);
   const [isArtificialLoading, setIsArtificialLoading] = useState(false);
+
+  useEffect(() => {
+    if (isActive) {
+      setIsActive(false);
+    }
+  }, [resetTrigger, isActive]);
 
   const safeData = {
     experimentNumber: experimentData.experimentNumber || "",
@@ -192,11 +212,22 @@ interface IndexPDFProps {
     sign?: string;
   }>;
   rowCount?: number;
+  resetTrigger?: string | number | Record<string, unknown>;
 }
 
-export function IndexPDFDownloadButton({ entries, rowCount }: IndexPDFProps) {
+export function IndexPDFDownloadButton({
+  entries,
+  rowCount,
+  resetTrigger,
+}: IndexPDFProps) {
   const [isActive, setIsActive] = useState(false);
   const [isArtificialLoading, setIsArtificialLoading] = useState(false);
+
+  useEffect(() => {
+    if (isActive) {
+      setIsActive(false);
+    }
+  }, [resetTrigger, isActive]);
 
   if (!isActive) {
     return (

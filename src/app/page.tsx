@@ -213,6 +213,17 @@ export default function Home() {
         validatedSteps = [{ text: "Error in steps", hasCode: false, code: "" }];
       }
 
+      // Create a resetTrigger based on experiment data
+      const resetTrigger = JSON.stringify({
+        experimentNumber,
+        experimentDate,
+        experimentTitle,
+        experimentAim,
+        stepsLength: algorithmSteps.length,
+        experimentResult,
+        resultOnNewPage,
+      });
+
       return (
         <Suspense fallback={<Button disabled>Loading PDF...</Button>}>
           <ExperimentPDFDownloadButton
@@ -226,6 +237,7 @@ export default function Home() {
               experimentResult: experimentResult || "",
               resultOnNewPage: resultOnNewPage,
             }}
+            resetTrigger={resetTrigger}
           />
         </Suspense>
       );
@@ -279,12 +291,19 @@ export default function Home() {
         sign: "",
       }));
 
+      // Create a resetTrigger based on index entries data
+      const resetTrigger = JSON.stringify({
+        entriesCount: indexEntries.length,
+        rowCount: indexRowCount,
+      });
+
       return (
         <Suspense fallback={<Button disabled>Loading PDF...</Button>}>
           <IndexPDFDownloadButton
             key={`pdf-index-${indexEntries.length}-${Date.now()}`}
             entries={formattedEntries}
             rowCount={indexRowCount}
+            resetTrigger={resetTrigger}
           />
         </Suspense>
       );
@@ -966,6 +985,11 @@ export default function Home() {
               program={program}
               output={output}
               image={outputImage || undefined}
+              resetTrigger={JSON.stringify({
+                program,
+                output,
+                hasImage: !!outputImage,
+              })}
             />
           </Suspense>
         ) : templateType === "experiment" ? (

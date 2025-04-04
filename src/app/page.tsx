@@ -29,6 +29,8 @@ import {
   ListOrdered,
   CheckCircle2,
   ImageIcon,
+  BookOpen,
+  ListChecks,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -56,6 +58,16 @@ const ExperimentPDFDownloadButton = dynamic(
   }
 );
 
+const IndexPDFDownloadButton = dynamic(
+  () =>
+    import("@/components/custom-button").then(
+      (mod) => mod.IndexPDFDownloadButton
+    ),
+  {
+    ssr: false,
+  }
+);
+
 interface AlgorithmStep {
   id: string;
   text: string;
@@ -63,10 +75,19 @@ interface AlgorithmStep {
   code: string;
 }
 
+interface IndexEntry {
+  id: string;
+  sno?: string;
+  date?: string;
+  topic?: string;
+  pageNo?: string;
+  sign?: string;
+}
+
 export default function Home() {
-  const [templateType, setTemplateType] = useState<"simple" | "experiment">(
-    "experiment"
-  );
+  const [templateType, setTemplateType] = useState<
+    "simple" | "experiment" | "index"
+  >("experiment");
 
   const [program, setProgram] = useState("");
   const [output, setOutput] = useState("");
@@ -87,6 +108,18 @@ export default function Home() {
     "Program has been executed successfully and obtained the output."
   );
   const [resultOnNewPage, setResultOnNewPage] = useState(false);
+
+  const [indexEntries, setIndexEntries] = useState<IndexEntry[]>(() => [
+    {
+      id: crypto.randomUUID(),
+      sno: "1",
+      date: "",
+      topic: "",
+      pageNo: "",
+      sign: "",
+    },
+  ]);
+  const [indexRowCount, setIndexRowCount] = useState(20);
 
   const addAlgorithmStep = (index: number) => {
     setAlgorithmSteps((prev) => {
@@ -126,6 +159,42 @@ export default function Home() {
       newSteps[index] = { ...newSteps[index], [field]: value };
       return newSteps;
     });
+  };
+
+  const addIndexEntry = () => {
+    setIndexEntries((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        sno: (prev.length + 1).toString(),
+        date: "",
+        topic: "",
+        pageNo: "",
+        sign: "",
+      },
+    ]);
+  };
+
+  const removeIndexEntry = (id: string) => {
+    setIndexEntries((prev) => {
+      const newEntries = prev.filter((entry) => entry.id !== id);
+      return newEntries.map((entry, index) => ({
+        ...entry,
+        sno: (index + 1).toString(),
+      }));
+    });
+  };
+
+  const updateIndexEntry = (
+    id: string,
+    field: keyof Omit<IndexEntry, "id" | "sign">,
+    value: string
+  ) => {
+    setIndexEntries((prev) =>
+      prev.map((entry) =>
+        entry.id === id ? { ...entry, [field]: value } : entry
+      )
+    );
   };
 
   const handleExperimentPDFDownload = () => {
@@ -198,6 +267,33 @@ export default function Home() {
     }
   };
 
+  const handleIndexPDFDownload = () => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const formattedEntries = indexEntries.map((entry) => ({
+        sno: entry.sno,
+        date: entry.date,
+        topic: entry.topic,
+        pageNo: entry.pageNo,
+        sign: "",
+      }));
+
+      return (
+        <Suspense fallback={<Button disabled>Loading PDF...</Button>}>
+          <IndexPDFDownloadButton
+            key={`pdf-index-${indexEntries.length}-${Date.now()}`}
+            entries={formattedEntries}
+            rowCount={indexRowCount}
+          />
+        </Suspense>
+      );
+    } catch (error) {
+      console.error("PDF Generation Error:", error);
+      return <Button variant="destructive">Failed to generate PDF</Button>;
+    }
+  };
+
   return (
     <div className="container mx-auto min-h-screen py-10 max-w-4xl px-4 sm:px-6">
       <Card className="mb-8 shadow-sm border-slate-200">
@@ -212,7 +308,7 @@ export default function Home() {
               </Label>
               <Select
                 value={templateType}
-                onValueChange={(value: "simple" | "experiment") =>
+                onValueChange={(value: "simple" | "experiment" | "index") =>
                   setTemplateType(value)
                 }
               >
@@ -223,6 +319,10 @@ export default function Home() {
                   <SelectValue placeholder="Select template type" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="index" className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    <span>Index Page</span>
+                  </SelectItem>
                   <SelectItem
                     value="experiment"
                     className="flex items-center gap-2"
@@ -339,7 +439,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              ) : (
+              ) : templateType === "experiment" ? (
                 <div className="grid gap-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -531,6 +631,126 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+              ) : (
+                <div className="grid gap-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <ListChecks className="h-4 w-4 text-slate-500" />
+                      <Label className="font-medium">Index Entries</Label>
+                    </div>
+                    <Card className="border border-slate-200 bg-slate-50 shadow-none">
+                      <CardContent className="p-4 space-y-4">
+                        <div className="grid grid-cols-12 gap-2 pb-2 border-b text-sm font-medium text-slate-500">
+                          <div className="col-span-1">S.NO</div>
+                          <div className="col-span-3">DATE</div>
+                          <div className="col-span-5">TOPIC</div>
+                          <div className="col-span-2">PAGE.NO</div>
+                          <div className="col-span-1"></div>
+                        </div>
+
+                        {indexEntries.map((entry) => (
+                          <div
+                            key={entry.id}
+                            className="grid grid-cols-12 gap-2 items-center"
+                          >
+                            <div className="col-span-1">
+                              <Input
+                                value={entry.sno || ""}
+                                onChange={(e) =>
+                                  updateIndexEntry(
+                                    entry.id,
+                                    "sno",
+                                    e.target.value
+                                  )
+                                }
+                                className="bg-white text-center p-2"
+                              />
+                            </div>
+                            <div className="col-span-3">
+                              <Input
+                                value={entry.date || ""}
+                                onChange={(e) =>
+                                  updateIndexEntry(
+                                    entry.id,
+                                    "date",
+                                    e.target.value
+                                  )
+                                }
+                                className="bg-white p-2"
+                              />
+                            </div>
+                            <div className="col-span-5">
+                              <Input
+                                value={entry.topic || ""}
+                                onChange={(e) =>
+                                  updateIndexEntry(
+                                    entry.id,
+                                    "topic",
+                                    e.target.value
+                                  )
+                                }
+                                className="bg-white p-2"
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <Input
+                                value={entry.pageNo || ""}
+                                onChange={(e) =>
+                                  updateIndexEntry(
+                                    entry.id,
+                                    "pageNo",
+                                    e.target.value
+                                  )
+                                }
+                                className="bg-white text-center p-2"
+                              />
+                            </div>
+                            <div className="col-span-1 flex justify-center">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => removeIndexEntry(entry.id)}
+                                title="Remove this entry"
+                                className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+
+                        <div className="pt-2">
+                          <Button
+                            variant="outline"
+                            onClick={addIndexEntry}
+                            className="flex items-center gap-2 w-full border-dashed"
+                          >
+                            <Plus className="h-4 w-4" /> Add Entry
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-4">
+                      <Label htmlFor="index-row-count" className="font-medium">
+                        Total Rows in Index (Including Empty Rows) :
+                      </Label>
+                      <Input
+                        id="index-row-count"
+                        type="number"
+                        min="5"
+                        max="50"
+                        value={indexRowCount}
+                        onChange={(e) =>
+                          setIndexRowCount(Number(e.target.value) || 20)
+                        }
+                        className="w-24 text-center"
+                      />
+                    </div>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -585,7 +805,7 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                ) : (
+                ) : templateType === "experiment" ? (
                   <div className="a4-preview experiment-template">
                     <div className="flex justify-between items-start mb-6">
                       <div>
@@ -656,6 +876,79 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
+                ) : (
+                  <div className="a4-preview index-template">
+                    <div className="mb-8 text-center">
+                      <h2 className="text-3xl font-semibold uppercase">
+                        Index
+                      </h2>
+                    </div>
+
+                    <table className="w-full border-collapse border border-slate-300">
+                      <thead>
+                        <tr className="bg-slate-100">
+                          <th className="border border-slate-300 p-2 text-center w-[8%] font-medium">
+                            S.NO
+                          </th>
+                          <th className="border border-slate-300 p-2 text-center w-[15%] font-medium">
+                            DATE
+                          </th>
+                          <th className="border border-slate-300 p-2 text-center w-[52%] font-medium">
+                            TOPIC
+                          </th>
+                          <th className="border border-slate-300 p-2 text-center w-[14%] font-medium">
+                            PAGE NO.
+                          </th>
+                          <th className="border border-slate-300 p-2 text-center w-[15%] font-medium">
+                            SIGN
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {indexEntries.map((entry, idx) => (
+                          <tr key={idx}>
+                            <td className="border border-slate-300 p-2 text-center">
+                              {entry.sno}
+                            </td>
+                            <td className="border border-slate-300 p-2 text-center">
+                              {entry.date}
+                            </td>
+                            <td className="border border-slate-300 p-2 text-left">
+                              {entry.topic}
+                            </td>
+                            <td className="border border-slate-300 p-2 text-center">
+                              {entry.pageNo}
+                            </td>
+                            <td className="border border-slate-300 p-2 text-center">
+                              {entry.sign}
+                            </td>
+                          </tr>
+                        ))}
+                        {Array.from({
+                          length: Math.min(
+                            3,
+                            indexRowCount - indexEntries.length
+                          ),
+                        }).map((_, idx) => (
+                          <tr key={`empty-${idx}`}>
+                            <td className="border border-slate-300 p-2 text-center">
+                              {indexEntries.length + idx + 1}
+                            </td>
+                            <td className="border border-slate-300 p-2"></td>
+                            <td className="border border-slate-300 p-2"></td>
+                            <td className="border border-slate-300 p-2"></td>
+                            <td className="border border-slate-300 p-2"></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {indexRowCount - indexEntries.length > 3 && (
+                      <p className="text-sm text-slate-500 mt-2 text-center">
+                        + {indexRowCount - indexEntries.length - 3} more empty
+                        rows will appear in the PDF
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </CardContent>
@@ -675,8 +968,10 @@ export default function Home() {
               image={outputImage || undefined}
             />
           </Suspense>
-        ) : (
+        ) : templateType === "experiment" ? (
           handleExperimentPDFDownload()
+        ) : (
+          handleIndexPDFDownload()
         )}
       </div>
     </div>

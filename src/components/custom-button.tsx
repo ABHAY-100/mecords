@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { PDFDocument } from "@/template/left_page";
 import { ExperimentPDFDocument } from "@/template/right_page";
+import { IndexPDFDocument } from "@/template/index_page";
 import { Download, FileDown } from "lucide-react";
 
 interface AlgorithmStep {
@@ -149,6 +150,75 @@ export function ExperimentPDFDownloadButton({
         />
       }
       fileName="rightside.pdf"
+      className="inline-block"
+    >
+      {({ loading, error }) => {
+        if (error) {
+          console.error("PDF generation error:", error);
+          return (
+            <Button
+              variant="destructive"
+              className="flex items-center gap-2"
+              onClick={() => setIsActive(false)}
+            >
+              <Download size={16} />
+              Error - Try Again
+            </Button>
+          );
+        }
+        return (
+          <Button
+            disabled={loading || isArtificialLoading}
+            className="flex items-center gap-2"
+            variant={loading || isArtificialLoading ? "secondary" : "default"}
+          >
+            <FileDown size={16} />
+            {loading || isArtificialLoading
+              ? "Preparing PDF..."
+              : "Download PDF"}
+          </Button>
+        );
+      }}
+    </PDFDownloadLink>
+  );
+}
+
+interface IndexPDFProps {
+  entries: Array<{
+    sno?: string;
+    date?: string;
+    topic?: string;
+    pageNo?: string;
+    sign?: string;
+  }>;
+  rowCount?: number;
+}
+
+export function IndexPDFDownloadButton({ entries, rowCount }: IndexPDFProps) {
+  const [isActive, setIsActive] = useState(false);
+  const [isArtificialLoading, setIsArtificialLoading] = useState(false);
+
+  if (!isActive) {
+    return (
+      <Button
+        onClick={() => {
+          setIsActive(true);
+          setIsArtificialLoading(true);
+          setTimeout(() => setIsArtificialLoading(false), 1000);
+        }}
+        className="flex items-center gap-2"
+        variant="outline"
+      >
+        <Download size={16} />
+        Generate PDF
+      </Button>
+    );
+  }
+
+  return (
+    <PDFDownloadLink
+      document={<IndexPDFDocument entries={entries} rowCount={rowCount} />}
+      fileName="index.pdf"
       className="inline-block"
     >
       {({ loading, error }) => {
